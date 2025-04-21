@@ -2,6 +2,27 @@ const cartIcon = document.querySelector("#cart-icon");
 const cart = document.querySelector(".cart");
 const cartClose = document.querySelector("#cart-close");
 const addCartButtons = document.querySelectorAll(".add-cart");
+const imgClicked = document.querySelectorAll(".img-box img");
+const body = document.querySelector("body");
+
+// Display a modal with the clicked image and a close icon
+imgClicked.forEach((clicked) => {
+  clicked.addEventListener("click", () => {
+    let boxImg = document.createElement("div");
+    let closeIcon = document.createElement("i");
+    let img = document.createElement("img");
+
+    boxImg.classList.add("show");
+    closeIcon.classList.add("fa-solid", "fa-xmark");
+    img.src = clicked.src;
+
+    boxImg.appendChild(img);
+    boxImg.appendChild(closeIcon);
+    body.appendChild(boxImg);
+
+    closeIcon.addEventListener("click", () => boxImg.remove());
+  });
+});
 
 // Add event listeners to open and close the cart
 cartIcon.addEventListener("click", () => cart.classList.add("active"));
@@ -14,7 +35,6 @@ addCartButtons.forEach((button) => {
     addToCart(productBox);
   });
 });
-
 
 // Function to add a product to the cart
 const cartContent = document.querySelector(".cart-content");
@@ -57,7 +77,7 @@ const addToCart = (productBox) => {
     updateTotalPrice();
   });
 
-    // Add event listener for incrementing and decrementing the quantity of the item
+  // Add event listener for incrementing and decrementing the quantity of the item
   cartBox.querySelector(".cart-quantity").addEventListener("click", (e) => {
     const numberElement = cartBox.querySelector(".number");
     const decrementBtn = cartBox.querySelector("#decrement");
