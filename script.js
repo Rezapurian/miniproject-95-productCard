@@ -5,6 +5,21 @@ const addCartButtons = document.querySelectorAll(".add-cart");
 const imgClicked = document.querySelectorAll(".img-box img");
 const body = document.querySelector("body");
 
+// Load products from Local Storage on page load
+document.addEventListener("DOMContentLoaded", () => {
+  const savedProducts = JSON.parse(localStorage.getItem("products")) || [];
+  savedProducts.forEach((product) => {
+    const productBox = document.createElement("div");
+    productBox.classList.add("product-box");
+    productBox.innerHTML = `
+    <img src="${product.productImgSrc}" alt="${product.productTitle}">
+    <h2 class="product-title">${product.productTitle}</h2>
+    <span class="price">${product.productPrice}</span>
+  `;
+    addToCart(productBox);
+  });
+});
+
 // Display a modal with the clicked image and a close icon
 imgClicked.forEach((clicked) => {
   clicked.addEventListener("click", () => {
@@ -42,6 +57,7 @@ const addToCart = (productBox) => {
   const productImgSrc = productBox.querySelector("img").src;
   const productTitle = productBox.querySelector(".product-title").textContent;
   const productPrice = productBox.querySelector(".price").textContent;
+  saveProductToLocalStorage(productImgSrc, productTitle, productPrice);
 
   const cartItems = document.querySelectorAll(".cart-product-title");
   for (let item of cartItems) {
@@ -71,6 +87,7 @@ const addToCart = (productBox) => {
 
   cartBox.querySelector(".cart-remove").addEventListener("click", () => {
     cartBox.remove();
+    removeProductFromLocalStorage(productImgSrc, productTitle, productPrice);
 
     updateCartCount(-1);
 
@@ -142,7 +159,15 @@ buyNowButton.addEventListener("click", () => {
     return;
   }
 
-  cartBoxes.forEach((cartBox) => cartBox.remove());
+  cartBoxes.forEach((cartBox) => {
+    const productImgSrc = cartBox.querySelector(".cart-img").src;
+    const productTitle = cartBox.querySelector(".cart-product-title").textContent;
+    const productPrice = cartBox.querySelector(".cart-price").textContent;
+
+    cartBox.remove()
+    removeProductFromLocalStorage(productImgSrc, productTitle, productPrice);
+  });
+  removeProductFromLocalStorage();
 
   cartItemCount = 0;
   updateCartCount(0);
@@ -151,3 +176,32 @@ buyNowButton.addEventListener("click", () => {
 
   alert("Thank you for your purchase!");
 });
+
+// Save a new product to Local Storage
+function saveProductToLocalStorage(productImgSrc, productTitle, productPrice) {
+  const products = JSON.parse(localStorage.getItem("products")) || [];
+  const isProductInCart = products.some(
+    (product) => product.productTitle === productTitle
+  );
+  if (isProductInCart) {
+    return;
+  }
+  products.push({ productImgSrc, productTitle, productPrice });
+  localStorage.setItem("products", JSON.stringify(products));
+}
+
+// Remove a product from Local Storage
+function removeProductFromLocalStorage(
+  productImgSrc,
+  productTitle,
+  productPrice
+) {
+  const products = JSON.parse(localStorage.getItem("products")) || [];
+  const updatedProducts = products.filter(
+    (product) =>
+      product.productImgSrc !== productImgSrc ||
+      product.productTitle !== productTitle ||
+      product.productPrice !== productPrice
+  );
+  localStorage.setItem("products", JSON.stringify(updatedProducts));
+}
